@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors } from '@nestjs/common';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { GetAuthorDto } from './dto/get-author.dto';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('author')
 export class AuthorController {
@@ -13,11 +14,17 @@ export class AuthorController {
     return this.authorService.create(createAuthorDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(10000)
+  @CacheKey('author-cache')
   @Get()
   findAll(@Query() query: GetAuthorDto) {
     return this.authorService.findAll(query);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(10000)
+  @CacheKey('author-cache-one')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.authorService.findOne(id);

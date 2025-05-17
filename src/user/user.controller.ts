@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('user')
 export class UserController {
@@ -23,11 +24,17 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(10000)
+  @CacheKey('user-cache')
   @Get()
   findAll(@Query() query: GetUserDto) {
     return this.userService.findAll(query);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(10000)
+  @CacheKey('user-cache')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
